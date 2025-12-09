@@ -1,6 +1,6 @@
-# Ajman University - Form Filler
+# All Form Filler
 
-A Python GUI application for generating PDF forms for Ajman University Main Store.
+A Python GUI application for generating PDF forms. Originally developed for Ajman University Main Store.
 
 ## Features
 
