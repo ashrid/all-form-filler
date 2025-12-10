@@ -5,6 +5,7 @@ Provides tabbed interface for form selection
 
 import tkinter as tk
 from tkinter import ttk
+import sys
 
 from .acknowledgment_form import AcknowledgmentFormFrame
 from .transfer_form import TransferFormFrame
@@ -29,22 +30,43 @@ class MainWindow:
         self._create_widgets()
 
     def _setup_styles(self):
-        """Configure ttk styles"""
+        """Configure ttk styles with platform-aware settings"""
         style = ttk.Style()
 
-        # Try to use a modern theme
+        # Platform-aware theme selection
         available_themes = style.theme_names()
-        if 'clam' in available_themes:
-            style.theme_use('clam')
-        elif 'vista' in available_themes:
+        if sys.platform == 'win32' and 'vista' in available_themes:
             style.theme_use('vista')
+        elif sys.platform == 'darwin' and 'aqua' in available_themes:
+            style.theme_use('aqua')
+        elif 'clam' in available_themes:
+            style.theme_use('clam')
+
+        # Cross-platform scaling factors
+        if sys.platform == 'win32':
+            pad_scale = 1.0
+        elif sys.platform == 'darwin':
+            pad_scale = 1.2
+        else:  # Linux
+            pad_scale = 1.0
+
+        tab_padding = [int(25 * pad_scale), int(8 * pad_scale)]
 
         # Configure colors
         style.configure("TFrame", background="#f5f5f5")
         style.configure("TLabel", background="#f5f5f5", font=("Helvetica", 10))
         style.configure("TButton", font=("Helvetica", 10))
         style.configure("TNotebook", background="#f5f5f5")
-        style.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[20, 8])
+
+        # Tab styling with consistent width for selected/unselected states
+        style.configure("TNotebook.Tab",
+                        font=("Helvetica", 11, "bold"),
+                        padding=tab_padding)
+
+        # State-based tab styling to prevent size changes on selection
+        style.map("TNotebook.Tab",
+                  padding=[("selected", tab_padding)],
+                  font=[("selected", ("Helvetica", 11, "bold"))])
 
         # Accent button style
         style.configure("Accent.TButton", font=("Helvetica", 12, "bold"))
@@ -75,11 +97,11 @@ class MainWindow:
 
         # Acknowledgment Form tab
         self.ack_frame = AcknowledgmentFormFrame(self.notebook)
-        self.notebook.add(self.ack_frame, text="  Acknowledgment of Receipt  ")
+        self.notebook.add(self.ack_frame, text="Acknowledgment of Receipt")
 
         # Transfer Form tab
         self.transfer_frame = TransferFormFrame(self.notebook)
-        self.notebook.add(self.transfer_frame, text="  Asset Transfer Form (ATF)  ")
+        self.notebook.add(self.transfer_frame, text="Asset Transfer Form (ATF)")
 
         # Bottom button bar
         button_frame = ttk.Frame(self.root)
